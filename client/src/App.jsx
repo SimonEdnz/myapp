@@ -17,6 +17,9 @@ import RoomDetails from "./components/RoomDetails";
 import ErrorPage from "./ErrorPage";
 import ComplaintsViewerOwner from "./components/ComplaintsViewerOwner";
 import RoomDetailsOwner from "./components/RoomDetailsOwner";
+import BranchList from "./components/BranchList";
+import CreateBranch from "./components/CreateBranch";
+import UpdateDeleteBranch from "./components/UpdateDeleteBranch";
 
 function App() {
   // Sidebar configuration
@@ -28,6 +31,7 @@ function App() {
       { name: "Create Owner", path: "/admin/createowner", icon: "➕" },
       { name: "Allot Parking Slot", path: "/admin/allottingparkingslot", icon: "🅿️" },
       { name: "Complaints", path: "/admin/complaints", icon: "📋" },
+      { name: "Branches", path: "/admin/branches", icon: "🌿" }, // New Branches route
       { name: "Logout", path: "/", icon: "🚪" },
     ],
     employee: [
@@ -67,6 +71,9 @@ function App() {
                 <Route path="createowner" element={<CreatingOwner />} />
                 <Route path="allottingparkingslot" element={<CreatingParkingSlot />} />
                 <Route path="complaints" element={<ComplaintsViewer />} />
+                <Route path="branches" element={<BranchList />} /> {/* New Branches route */}
+                <Route path="createbranch" element={<CreateBranch />} /> {/* New Create Branch route */}
+                <Route path="updatebranch" element={<UpdateDeleteBranch />} /> {/* New Update/Delete Branch route */}
               </Routes>
             </MainLayout>
           }

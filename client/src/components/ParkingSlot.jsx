@@ -18,31 +18,38 @@ function ParkingSlot(props) {
   useEffect(() => {
     slots();
   }, []);
+
   return (
     <div>
       <div>
-        <h1 className="ml-2 text-lg my-2 font-bold">Parking Slot</h1>
+        <h1 style={{ marginLeft: '8px', fontSize: '1.125rem', marginBottom: '8px', fontWeight: 'bold' }}>
+          Parking Slot
+        </h1>
       </div>
-      <div className="flex">
+      <div style={{ display: 'flex' }}>
         {parkingSlot.map((ele, index) => {
           if (ele.parking_slot === null) {
             return (
               <div
                 key={index + 1}
-                className="w-full h-full flex justify-center items-center"
+                style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}
               >
-                <h1 className="font-medium text-lg">No parking slot alloted</h1>
+                <h1 style={{ fontWeight: '500', fontSize: '1.125rem' }}>
+                  No parking slot alloted
+                </h1>
               </div>
             );
           } else {
             return (
-              <div key={index + 1} className="p-5 border-2 m-2">
-                <h1 className="">Slot no</h1>
-                <p className="">{ele.parking_slot}</p>
+              <div
+                key={index + 1}
+                style={{ padding: '20px', border: '2px solid', margin: '8px' }}
+              >
+                <h1>Slot no</h1>
+                <p>{ele.parking_slot}</p>
               </div>
             );
           }
-          // console.log(ele);
         })}
       </div>
     </div>

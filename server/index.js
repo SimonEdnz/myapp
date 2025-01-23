@@ -258,6 +258,71 @@ app.post('/paymaintanance',(req,res)=>
       }
   })
 });
+
+// Fetch all branches
+app.get('/branches', (req, res) => {
+  db.getdata('branches', (err, result) => {
+    if (err) {
+      console.error('Error fetching branches:', err);
+      res.sendStatus(500);
+    } else {
+      res.send(result);
+    }
+  });
+});
+// Create a new branch
+app.post('/createbranch', (req, res) => {
+  const { branch_name, manager, rooms_available, rooms_empty, rooms_occupied } = req.body;
+  const values = [branch_name, manager, rooms_available, rooms_empty, rooms_occupied];
+  db.createBranch(values, (err, result) => {
+    if (err) {
+      console.error('Error creating branch:', err);
+      res.sendStatus(500);
+    } else {
+      res.sendStatus(201);
+    }
+  });
+});
+
+// Update an existing branch
+app.put('/updatebranch/:branch_id', (req, res) => {
+  const { branch_id } = req.params;
+  const { branch_name, manager, rooms_available, rooms_empty, rooms_occupied } = req.body;
+  const values = [branch_name, manager, rooms_available, rooms_empty, rooms_occupied, branch_id];
+  db.updateBranch(values, (err, result) => {
+    if (err) {
+      console.error('Error updating branch:', err);
+      res.sendStatus(500);
+    } else {
+      res.sendStatus(200);
+    }
+  });
+});
+
+// Delete a branch
+app.delete('/deletebranch/:branch_id', (req, res) => {
+  const { branch_id } = req.params;
+  db.deleteBranch(branch_id, (err, result) => {
+    if (err) {
+      console.error('Error deleting branch:', err);
+      res.sendStatus(500);
+    } else {
+      res.sendStatus(200);
+    }
+  });
+});
+
+// Get all branches
+app.get('/branches', (req, res) => {
+  db.getdata('branches', (err, result) => {
+    if (err) {
+      console.log(err);
+      res.sendStatus(500);
+    } else {
+      res.send(result);
+    }
+  });
+});
 //Other routes
 app.get('*', function(req, res){
   res.send('Sorry, this is an invalid URL.');

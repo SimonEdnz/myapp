@@ -53,31 +53,6 @@ In this project we created a Apartment management system with user interface and
 
 - All the admins, owners, tenant, employees can login and logout.
 
-## ER Diagram
-
-<kbd><img src="assets/er-diagram.png" width="800px"></kbd>
-
-## Database Schema
-
-<kbd><img src="assets/schema.png" alt="database-schema" width="800px"></kbd>
-
-## Screenshots of the Implementation
-
-### Admin dashboard
-
-<kbd><img src="assets/admin.png" alt="admin-dashboard" width="800px"></kbd>
-
-### Owner dashboard
-
-<kbd><img src="assets/owner.png" alt="owner-dashboard" width="800px"></kbd>
-
-### Tenant dashboard
-
-<kbd><img src="assets/tenant.png" alt="tenant-dashboard" width="800px"></kbd>
-
-### Employee dashboard
-
-<kbd><img src="assets/employee.png" alt="employee-dashboard" width="800px"></kbd>
 
 # Tech Stack
 
