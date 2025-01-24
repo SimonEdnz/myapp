@@ -1,329 +1,180 @@
 const express = require("express");
-const bodyParser = require('body-parser');
-const db = require('./mysql_connect');
-const dashB = require('./routes/dashb');
-const cors = require("cors")
+const bodyParser = require("body-parser");
+const cors = require("cors");
+const db = require("./mysql_connect");
 
-
-//port number to listen
+const app = express();
 const port = 5000;
 
-//init
-const app = express();
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
-app.use("/dashboard",dashB);
-app.use(cors())
+app.use(cors());
 
-
-//initializing
-app.listen(port,()=>{
-  console.log("Server starten to listen...");
-}); 
-
-
-//home page 
-app.get('/', function(req, res){
+// Home Page
+app.get("/", (req, res) => {
   res.send("Only accepting GET and POST requests!");
 });
 
-
-
-//authorisation
+// Authorization
 app.post("/auth", (req, res) => {
-  const username = req.body.username;
-  const password = req.body.password;
-  let rep = "unknown";
-  let acces = "denied";
+  const { username, password } = req.body;
 
-  if(username &&
-    username.toUpperCase().charAt(0) === "E" &&
-    password &&
-    password.length >= 6){
-      rep = "employee";
-
-      // res.send({ user: "employee" });
-    }else if (
-    username &&
-    username.toUpperCase().charAt(0) === "A" &&
-    password &&
-    password.length >= 6
-  ) {
-    rep = "admin";
-  }else if (
-    username &&
-    username.toUpperCase().charAt(0) === "T" &&
-    password &&
-    password.length >= 6
-  ) {
-    rep = "tenant";
-  }else if (
-    username &&
-    username.toUpperCase().charAt(0) === "O" &&
-    password &&
-    password.length >= 6
-  ) {
-    rep= "owner";
-  }  else if(password.length < 6) {
-    res.send({ user: "passunknown" });
-  }else {
-    res.send({ user: "unknown" });
+  if (!username || !password || password.length < 6) {
+    return res.send({ user: "passunknown" });
   }
 
-  const resul =db.authoriseuser(username,password,(err,result)=>{
-    if(err) console.log(err);
-    acces = result;
-    console.log(acces);
-    res.send({
-      access: acces,
-      user: rep,
+  const firstChar = username.toUpperCase().charAt(0);
+  const userTypeMap = { E: "employee", A: "admin", T: "tenant", O: "owner" };
+  const userType = userTypeMap[firstChar] || "unknown";
+
+  db.authorizeUser(username, password, (err, result) => {
+    if (err) return res.status(500).send(err);
+    res.send({ access: result, user: userType });
+  });
+});
+
+// Register Complaint
+app.post("/raisingcomplaint", (req, res) => {
+  const { descp, blockno, roomno } = req.body;
+  const values = [descp, blockno, roomno];
+
+  db.registerComplaint(values, (err, result) => {
+    if (err) return res.status(500).send(err);
+    res.send(result);
+  });
+});
+
+// View Complaints
+app.get("/viewcomplaints", (req, res) => {
+  db.viewComplaints((err, result) => {
+    if (err) return res.status(500).send(err);
+    res.send(result);
+  });
+});
+
+// Branch Management
+app.route("/branches")
+  .get((req, res) => {
+    db.getData("branches", (err, result) => {
+      if (err) return res.status(500).send(err);
+      res.send(result);
     });
   })
-});
+  .post((req, res) => {
+    const { branch_name, manager, rooms_available, rooms_empty, rooms_occupied } = req.body;
+    const values = [branch_name, manager, rooms_available, rooms_empty, rooms_occupied];
 
-
-//register complaint
-app.post('/raisingcomplaint',function(req,res){
-    const desc = req.body.descp;
-    const blockno = req.body.blockno;
-    const roomno = req.body.roomno;
-    const values = [desc,blockno,roomno];
-    const resul =db.registercomplaint(values,(err,result)=>{
-      if(err) console.log(err);
-    res.send(result);
-    })
-});
-
-//create a new tenant by owner
-app.post('/createtenant',function(req,res){
-  const name = req.body.name;
-  const age = req.body.age;
-  const tenantno = req.body.tenantno;  
-  const adhaar = req.body.adhaar;
-  const roomno = req.body.roomno;
-  const password = req.body.password;
-  const dob = req.body.dob;
-  const values = [tenantno,name,dob,roomno,age];
-  const resul =db.createtenant(values,(err,result)=>{
-    if(err) console.log(err);
-  const prof = [adhaar,tenantno];
-  const vals = ["t-"+tenantno,password,tenantno];
-  const resul =db.createtenantproof(prof,(err,result)=>{
-    if(err) console.log(err);//res.sendStatus(404);
-  })
-  const respn =db.createuserid(vals,(err,result)=>{
-    if(err) console.log(err);//res.sendStatus(404);
-    else res.sendStatus(200);
-  })
-});
-});
-
-
-//creates owner in owner table
-app.post('/createowner',(req,res)=>
-{
-  const ownerid = req.body.ownerId;
-    const name = req.body.name;
-    const age = req.body.age;
-    const aggrement_status = req.body.aggrementStatus;
-    const roomno = req.body.roomno;
-    const dob = req.body.dob;
-    const proof = req.body.adhaar;
-    const values = [ownerid,name,age,aggrement_status,roomno,dob];
-    const proofval = [proof,ownerid];
-    const password = req.body.password;
-    const vals = ["o-"+ownerid,password,ownerid];
-
-    const rest = db.createowner(values,(err,result)=>{
-      if(err) console.log(err);//res.sendStatus(404);
-  });
-  const rep = db.createownerproof(proofval,(err,result)=>{
-    console.log(proofval);
-    if(err) console.log(err);//res.sendStatus(404);
-});
-const respn =db.createuserid(vals,(err,result)=>{
-  if(err) console.log(err);//res.sendStatus(404);
-  else res.sendStatus(200);
-})
-});
-
-
-
-//get the tenent details fetch all data from table
-app.get('/tenantdetails',(req,res)=>
-{
-    const rest = db.getdata('tenant',(err,result)=>
-    {
-      res.send(result);
-    })
-})
-
-
-
-//get the owner details fetch all the data from the table
-app.get('/ownerdetails',(req,res)=>
-{
-    const rest = db.getdata('owner',(err,result)=>
-    {
-      res.send(result);
-    })
-})
-
-//view parkings owned by tenant
-app.post('/viewparking',(req,res)=>
-{
-  const id = req.body.userId;
-  const rest = db.viewparking(id,(err,result)=>
-  {
-    if(err) console.log(err);
-    res.send(result);
-  })
-})
-
-
-
-//get the room details owned by the owner
-app.post('/ownercomplaints',(req,res)=>
-{
-  const ownerid = req.body.userId;
-    const rest = db.ownercomplaints(ownerid,(err,result)=>
-    {
-      if(err) console.log(err);
-      res.send(result);
-    })
-})
-
-
-//view complaints that are in the database
-app.get('/viewcomplaints',(req,res)=>
-{
-    const rest = db.viewcomplaints((err,result)=>
-    {
-      res.send(result);
-    })
-})
-
-
-//getonlycomplaints according to owner
-app.post('/ownerroomdetails',(req,res)=>
-{
-    const ownerId = req.body.userId;
-    const rest = db.ownerroomdetails(ownerId,(err,result)=>
-    {
-      if(err) console.log(err);
-      res.send(result);
-    })
-})
-
-
-
-
-//books parking slot for tenents
-app.post('/bookslot',(req,res)=>
-{
-    const roomno =req.body.roomNo;
-    const slno = req.body.slotNo;
-    const values = [slno,roomno,];
-    const rest = db.bookslot(values,(err,result)=>{
-      if(err) console.log(err);
-      if(err) res.sendStatus(405);
-      else{
-        res.sendStatus(200);
-      }
-      
-  })
-});
-
-
-app.post('/ownertenantdetails',(req,res)=>
-{
-    const id = req.body.userId;
-    const rest = db.ownertenantdetails(id,(err,result)=>{
-      if(err) console.log(err);
-      if(err) res.sendStatus(405);
-      else{
-        res.send(result);
-      }
-  })
-});
-
-app.post('/paymaintanance',(req,res)=>
-{
-    const id = req.body.userId;
-    const rest = db.paymaintanence(id,(err,result)=>{
-      if(err) console.log(err);
-      if(err) res.sendStatus(405);
-      else{
-        res.sendStatus(200);
-      }
-  })
-});
-
-// Fetch all branches
-app.get('/branches', (req, res) => {
-  db.getdata('branches', (err, result) => {
-    if (err) {
-      console.error('Error fetching branches:', err);
-      res.sendStatus(500);
-    } else {
-      res.send(result);
-    }
-  });
-});
-// Create a new branch
-app.post('/createbranch', (req, res) => {
-  const { branch_name, manager, rooms_available, rooms_empty, rooms_occupied } = req.body;
-  const values = [branch_name, manager, rooms_available, rooms_empty, rooms_occupied];
-  db.createBranch(values, (err, result) => {
-    if (err) {
-      console.error('Error creating branch:', err);
-      res.sendStatus(500);
-    } else {
+    db.createBranch(values, (err, result) => {
+      if (err) return res.status(500).send(err);
       res.sendStatus(201);
-    }
+    });
   });
-});
 
-// Update an existing branch
-app.put('/updatebranch/:branch_id', (req, res) => {
-  const { branch_id } = req.params;
-  const { branch_name, manager, rooms_available, rooms_empty, rooms_occupied } = req.body;
-  const values = [branch_name, manager, rooms_available, rooms_empty, rooms_occupied, branch_id];
-  db.updateBranch(values, (err, result) => {
-    if (err) {
-      console.error('Error updating branch:', err);
-      res.sendStatus(500);
-    } else {
+app.route("/branches/:branch_id")
+  .put((req, res) => {
+    const { branch_id } = req.params;
+    const { branch_name, manager, rooms_available, rooms_empty, rooms_occupied } = req.body;
+    const values = [branch_name, manager, rooms_available, rooms_empty, rooms_occupied, branch_id];
+
+    db.updateBranch(values, (err, result) => {
+      if (err) return res.status(500).send(err);
       res.sendStatus(200);
-    }
-  });
-});
+    });
+  })
+  .delete((req, res) => {
+    const { branch_id } = req.params;
 
-// Delete a branch
-app.delete('/deletebranch/:branch_id', (req, res) => {
-  const { branch_id } = req.params;
-  db.deleteBranch(branch_id, (err, result) => {
-    if (err) {
-      console.error('Error deleting branch:', err);
-      res.sendStatus(500);
-    } else {
+    db.deleteBranch(branch_id, (err, result) => {
+      if (err) return res.status(500).send(err);
       res.sendStatus(200);
-    }
+    });
   });
-});
 
-// Get all branches
-app.get('/branches', (req, res) => {
-  db.getdata('branches', (err, result) => {
-    if (err) {
-      console.log(err);
-      res.sendStatus(500);
-    } else {
+// Room Management
+app.route("/branches/:branch_id/rooms")
+  .get((req, res) => {
+    const { branch_id } = req.params;
+
+    db.getRoomsByBranch(branch_id, (err, result) => {
+      if (err) return res.status(500).send(err);
       res.send(result);
-    }
+    });
   });
+
+app.route("/rooms")
+  .post((req, res) => {
+    const { branch_id, room_number, room_type, rent_amount, status, created_by } = req.body;
+    const values = [branch_id, room_number, room_type, rent_amount, status, created_by];
+
+    db.createRoom(values, (err, result) => {
+      if (err) return res.status(500).send(err);
+      res.sendStatus(201);
+    });
+  });
+
+app.route("/rooms/:room_id")
+  .put((req, res) => {
+    const { room_id } = req.params;
+    const { room_number, room_type, rent_amount, status, updated_by } = req.body;
+    const values = [room_number, room_type, rent_amount, status, updated_by, room_id];
+
+    db.updateRoom(values, (err, result) => {
+      if (err) return res.status(500).send(err);
+      res.sendStatus(200);
+    });
+  })
+  .delete((req, res) => {
+    const { room_id } = req.params;
+
+    db.deleteRoom(room_id, (err, result) => {
+      if (err) return res.status(500).send(err);
+      res.sendStatus(200);
+    });
+  });
+
+// Tenant Management
+app.route("/tenants")
+  .get((req, res) => {
+    db.getData("tenants", (err, result) => {
+      if (err) return res.status(500).send(err);
+      res.send(result);
+    });
+  })
+  .post((req, res) => {
+    const { first_name, last_name, phone, email, address, date_of_birth, occupation, emergency_contact, created_by } = req.body;
+    const values = [first_name, last_name, phone, email, address, date_of_birth, occupation, emergency_contact, created_by];
+
+    db.createRoom(values, (err, result) => {
+      if (err) return res.status(500).send(err);
+      res.sendStatus(201);
+    });
+  });
+
+app.route("/tenants/:tenant_id")
+  .put((req, res) => {
+    const { tenant_id } = req.params;
+    const { first_name, last_name, phone, email, address, date_of_birth, occupation, emergency_contact, updated_by } = req.body;
+    const values = [first_name, last_name, phone, email, address, date_of_birth, occupation, emergency_contact, updated_by, tenant_id];
+
+    db.updateRoom(values, (err, result) => {
+      if (err) return res.status(500).send(err);
+      res.sendStatus(200);
+    });
+  })
+  .delete((req, res) => {
+    const { tenant_id } = req.params;
+
+    db.deleteRoom(tenant_id, (err, result) => {
+      if (err) return res.status(500).send(err);
+      res.sendStatus(200);
+    });
+  });
+
+// Invalid URL Fallback
+app.get("*", (req, res) => {
+  res.send("Invalid URL.");
 });
-//Other routes
-app.get('*', function(req, res){
-  res.send('Sorry, this is an invalid URL.');
+
+app.listen(port, () => {
+  console.log(`Server listening on port ${port}`);
 });

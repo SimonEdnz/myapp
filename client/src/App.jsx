@@ -1,87 +1,110 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
 import Header from "./components/Header";
-import Dashboard from "./components/Dashboard";
 import Sidebar from "./components/Sidebar";
+import Dashboard from "./components/Dashboard";
 import Auth from "./components/Auth";
-import OwnerDetails from "./components/OwnerDetails";
 import TenantDetails from "./components/TenantDetails";
-import CreatingOwner from "./components/CreatingOwner";
-import CreatingParkingSlot from "./components/CreatingParkingSlot";
 import ComplaintsViewer from "./components/ComplaintsViewer";
-import RaisingComplaints from "./components/RaisingComplaints";
-import ParkingSlot from "./components/ParkingSlot";
-import PayMaintenance from "./components/PayMaintenance";
-import CreatingTenant from "./components/CreatingTenant";
-import RoomDetails from "./components/RoomDetails";
-import ErrorPage from "./ErrorPage";
-import ComplaintsViewerOwner from "./components/ComplaintsViewerOwner";
-import RoomDetailsOwner from "./components/RoomDetailsOwner";
 import BranchList from "./components/BranchList";
 import CreateBranch from "./components/CreateBranch";
 import UpdateDeleteBranch from "./components/UpdateDeleteBranch";
+import RoomList from "./components/RoomList";
+import InvoiceList from "./components/InvoiceList";
+import LeaseAgreementList from "./components/LeaseAgreementList";
+import Notifications from "./components/Notifications";
+import Settings from "./components/Settings";
+import Expenses from "./components/Expenses";
+import RoomDetailsOwner from "./components/RoomDetailsOwner"; // Import RoomDetailsOwner component
+import ErrorPage from "./ErrorPage";
 
+// Sidebar configuration for admin routes
+const adminRoutes = [
+  { name: "Dashboard", path: "/admin", icon: "📊" },
+  { name: "Tenant Details", path: "/admin/tenantdetails", icon: "👤" },
+  { name: "Complaints", path: "/admin/complaints", icon: "📋" },
+  { name: "Branches", path: "/admin/branches", icon: "🌿" },
+  { name: "Rooms", path: "/admin/rooms", icon: "🛏️" },
+  { name: "Invoices", path: "/admin/invoices", icon: "💵" },
+  { name: "Lease Agreements", path: "/admin/leaseagreements", icon: "📜" },
+  { name: "Notifications", path: "/admin/notifications", icon: "🔔" },
+  { name: "Settings", path: "/settings", icon: "⚙️" },
+  { name: "Expenses", path: "/expenses", icon: "💸" },
+  { name: "Logout", path: "/", icon: "🚪" },
+];
+
+// Sidebar configuration for employee routes
+const employeeRoutes = [
+  { name: "Dashboard", path: "/employee", icon: "📊" },
+  { name: "Complaints", path: "/employee/complaints", icon: "📋" },
+  { name: "Logout", path: "/", icon: "🚪" },
+];
+
+// Sidebar configuration for tenant routes
+const tenantRoutes = [
+  { name: "Dashboard", path: "/tenant", icon: "📊" },
+  { name: "Complaints", path: "/tenant/complaints", icon: "📋" },
+  { name: "Logout", path: "/", icon: "🚪" },
+];
+
+// Sidebar configuration for owner routes
+const ownerRoutes = [
+  { name: "Dashboard", path: "/owner", icon: "📊" },
+  { name: "Tenant Details", path: "/owner/tenantdetails", icon: "👤" },
+  { name: "Complaints", path: "/owner/complaints", icon: "📋" },
+  { name: "Room Details", path: "/owner/roomdetails", icon: "🛏️" },
+  { name: "Logout", path: "/", icon: "🚪" },
+];
+
+// Main layout with sidebar and header
+function MainLayout({ sidebarLinks, children }) {
+  return (
+    <div className="flex">
+      <Sidebar links={sidebarLinks} />
+      <div className="flex-grow">
+        <Header />
+        <main className="p-5">{children}</main>
+      </div>
+    </div>
+  );
+}
+
+// Main App Component
 function App() {
-  // Sidebar configuration
-  const routesConfig = {
-    admin: [
-      { name: "Dashboard", path: "/admin", icon: "📊" },
-      { name: "Tenant Details", path: "/admin/tenantdetails", icon: "👤" },
-      { name: "Owner Details", path: "/admin/ownerdetails", icon: "🏠" },
-      { name: "Create Owner", path: "/admin/createowner", icon: "➕" },
-      { name: "Allot Parking Slot", path: "/admin/allottingparkingslot", icon: "🅿️" },
-      { name: "Complaints", path: "/admin/complaints", icon: "📋" },
-      { name: "Branches", path: "/admin/branches", icon: "🌿" }, // New Branches route
-      { name: "Logout", path: "/", icon: "🚪" },
-    ],
-    employee: [
-      { name: "Dashboard", path: "/employee", icon: "📊" },
-      { name: "Complaints", path: "/employee/complaints", icon: "📋" },
-      { name: "Logout", path: "/", icon: "🚪" },
-    ],
-    tenant: [
-      { name: "Dashboard", path: "/tenant", icon: "📊" },
-      { name: "Raise Complaints", path: "/tenant/raisingcomplaints", icon: "📋" },
-      { name: "Parking Slot", path: "/tenant/allotedparkingslot", icon: "🅿️" },
-      { name: "Pay Maintenance", path: "/tenant/paymaintenance", icon: "💳" },
-      { name: "Logout", path: "/", icon: "🚪" },
-    ],
-    owner: [
-      { name: "Dashboard", path: "/owner", icon: "📊" },
-      { name: "Tenant Details", path: "/owner/tenantdetails", icon: "👤" },
-      { name: "Complaints", path: "/owner/complaint", icon: "📋" },
-      { name: "Create Tenant", path: "/owner/createtenant", icon: "➕" },
-      { name: "Room Details", path: "/owner/roomdetails", icon: "🛏️" },
-      { name: "Logout", path: "/", icon: "🚪" },
-    ],
-  };
-
   return (
     <div className="App font-mons bg-gray-100 min-h-screen">
       <Routes>
+        {/* Authentication Route */}
         <Route path="/" element={<Auth />} />
+
+        {/* Admin Dashboard and Routes */}
         <Route
           path="/admin/*"
           element={
-            <MainLayout sidebarLinks={routesConfig.admin}>
+            <MainLayout sidebarLinks={adminRoutes}>
               <Routes>
                 <Route path="/" element={<Dashboard />} />
                 <Route path="tenantdetails" element={<TenantDetails />} />
-                <Route path="ownerdetails" element={<OwnerDetails />} />
-                <Route path="createowner" element={<CreatingOwner />} />
-                <Route path="allottingparkingslot" element={<CreatingParkingSlot />} />
                 <Route path="complaints" element={<ComplaintsViewer />} />
-                <Route path="branches" element={<BranchList />} /> {/* New Branches route */}
-                <Route path="createbranch" element={<CreateBranch />} /> {/* New Create Branch route */}
-                <Route path="updatebranch" element={<UpdateDeleteBranch />} /> {/* New Update/Delete Branch route */}
+                <Route path="branches" element={<BranchList />} />
+                <Route path="createbranch" element={<CreateBranch />} />
+                <Route path="updatebranch" element={<UpdateDeleteBranch />} />
+                <Route path="rooms" element={<RoomList />} />
+                <Route path="invoices" element={<InvoiceList />} />
+                <Route path="leaseagreements" element={<LeaseAgreementList />} />
+                <Route path="notifications" element={<Notifications />} />
+                <Route path="settings" element={<Settings />} />
+                <Route path="expenses" element={<Expenses />} />
               </Routes>
             </MainLayout>
           }
         />
+
+        {/* Employee Routes */}
         <Route
           path="/employee/*"
           element={
-            <MainLayout sidebarLinks={routesConfig.employee}>
+            <MainLayout sidebarLinks={employeeRoutes}>
               <Routes>
                 <Route path="/" element={<Dashboard />} />
                 <Route path="complaints" element={<ComplaintsViewer />} />
@@ -89,33 +112,35 @@ function App() {
             </MainLayout>
           }
         />
+
+        {/* Tenant Routes */}
         <Route
           path="/tenant/*"
           element={
-            <MainLayout sidebarLinks={routesConfig.tenant}>
+            <MainLayout sidebarLinks={tenantRoutes}>
               <Routes>
                 <Route path="/" element={<Dashboard />} />
-                <Route path="raisingcomplaints" element={<RaisingComplaints />} />
-                <Route path="allotedparkingslot" element={<ParkingSlot />} />
-                <Route path="paymaintenance" element={<PayMaintenance />} />
+                <Route path="complaints" element={<ComplaintsViewer />} />
               </Routes>
             </MainLayout>
           }
         />
+
+        {/* Owner Routes */}
         <Route
           path="/owner/*"
           element={
-            <MainLayout sidebarLinks={routesConfig.owner}>
+            <MainLayout sidebarLinks={ownerRoutes}>
               <Routes>
                 <Route path="/" element={<Dashboard />} />
                 <Route path="tenantdetails" element={<RoomDetailsOwner />} />
-                <Route path="complaint" element={<ComplaintsViewerOwner />} />
-                <Route path="createtenant" element={<CreatingTenant />} />
-                <Route path="roomdetails" element={<RoomDetails />} />
+                <Route path="roomdetails" element={<RoomDetailsOwner />} />
               </Routes>
             </MainLayout>
           }
         />
+
+        {/* 404 Error Route */}
         <Route
           path="*"
           element={
@@ -125,19 +150,6 @@ function App() {
           }
         />
       </Routes>
-    </div>
-  );
-}
-
-// Main layout with modern sidebar and header
-function MainLayout({ sidebarLinks, children }) {
-  return (
-    <div className="flex">
-      <Sidebar links={sidebarLinks} />
-      <div className="flex-grow">
-        <Header />
-        <main className="p-5">{children}</main>
-      </div>
     </div>
   );
 }
