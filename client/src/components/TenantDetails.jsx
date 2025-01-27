@@ -21,7 +21,7 @@ const TenantList = () => {
   // Fetch tenants when the component mounts
   useEffect(() => {
     axios
-      .get('/tenants')
+      .get('http://localhost:5000/tenants')
       .then((response) => {
         setTenants(response.data);
       })
@@ -51,7 +51,7 @@ const TenantList = () => {
   // Create new tenant
   const handleCreateTenant = () => {
     axios
-      .post('/tenants', newTenant)
+      .post('http://localhost:5000/tenants', newTenant)
       .then(() => {
         alert('Tenant created successfully!');
         setNewTenant({
@@ -66,7 +66,7 @@ const TenantList = () => {
           emergency_contact: '',
         });
         // Refetch tenants after creating
-        return axios.get('/tenants');
+        return axios.get('http://localhost:5000/tenants');
       })
       .then((response) => {
         setTenants(response.data);
@@ -79,11 +79,11 @@ const TenantList = () => {
   // Update tenant
   const handleUpdateTenant = () => {
     axios
-      .put(`/tenants/${editingTenant.tenant_id}`, editingTenant)
+      .put(`http://localhost:5000/tenants/${editingTenant.tenant_id}`, editingTenant)
       .then(() => {
         alert('Tenant updated successfully!');
         // Refetch tenants after updating
-        return axios.get('/tenants');
+        return axios.get('http://localhost:5000/tenants');
       })
       .then((response) => {
         setTenants(response.data);
@@ -97,11 +97,11 @@ const TenantList = () => {
   // Delete tenant
   const handleDeleteTenant = (tenantId) => {
     axios
-      .delete(`/tenants/${tenantId}`)
+      .delete(`http://localhost:5000/tenants/${tenantId}`)
       .then(() => {
         alert('Tenant deleted successfully!');
         // Refetch tenants after deleting
-        return axios.get('/tenants');
+        return axios.get('http://localhost:5000/tenants');
       })
       .then((response) => {
         setTenants(response.data);

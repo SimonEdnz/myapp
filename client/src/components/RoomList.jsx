@@ -2,33 +2,33 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
 const RoomList = ({ branchId }) => {
-  // State variables
   const [rooms, setRooms] = useState([]);
   const [newRoom, setNewRoom] = useState({
     branch_id: branchId,
     room_number: '',
-    room_type: '',
-    rent_amount: '',
-    status: 'available',
+    room_type: 'single',
+    price: '',
+    status: 'empty',
+    tenant_id: '',
     created_by: 'admin', // Example, replace with actual user ID if necessary
   });
   const [editingRoom, setEditingRoom] = useState(null);
 
-  // Fetch rooms when the component mounts or branchId changes
   useEffect(() => {
-    console.log('Fetching rooms...');
+    fetchRooms();
+  }, [branchId]);
+
+  const fetchRooms = () => {
     axios
-      .get(`/branches/${branchId}/rooms`)
+      .get(`http://localhost:5000/branches/${branchId}/rooms`)
       .then((response) => {
-        console.log('Rooms fetched:', response.data);
         setRooms(response.data);
       })
       .catch((error) => {
         console.error('There was an error fetching rooms!', error);
       });
-  }, [branchId]);
+  };
 
-  // Handle changes in room form inputs
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setNewRoom((prevState) => ({
@@ -37,7 +37,6 @@ const RoomList = ({ branchId }) => {
     }));
   };
 
-  // Handle changes in room edit form
   const handleEditChange = (e) => {
     const { name, value } = e.target;
     setEditingRoom((prevState) => ({
@@ -46,45 +45,33 @@ const RoomList = ({ branchId }) => {
     }));
   };
 
-  // Create new room
   const handleCreateRoom = () => {
-    console.log('Creating room with data:', newRoom);  // Debugging
     axios
-      .post('/rooms', newRoom)
-      .then((response) => {
-        console.log('Room created:', response.data);
+      .post('http://localhost:5000/rooms', newRoom)
+      .then(() => {
         alert('Room created successfully!');
         setNewRoom({
           ...newRoom,
           room_number: '',
-          room_type: '',
-          rent_amount: '',
-          status: 'available',
+          room_type: 'single',
+          price: '',
+          status: 'empty',
+          tenant_id: '',
         });
-        // Refetch rooms after creating
-        return axios.get(`/branches/${branchId}/rooms`);
-      })
-      .then((response) => {
-        setRooms(response.data);
+        fetchRooms();
       })
       .catch((error) => {
         console.error('Error creating room:', error);
+        console.log('Error details:', error.response ? error.response.data : error.message);
       });
   };
 
-  // Update room
   const handleUpdateRoom = () => {
-    console.log('Updating room with data:', editingRoom); // Debugging
     axios
-      .put(`/rooms/${editingRoom.room_id}`, editingRoom)
-      .then((response) => {
-        console.log('Room updated:', response.data);
+      .put(`http://localhost:5000/rooms/${editingRoom.room_id}`, editingRoom)
+      .then(() => {
         alert('Room updated successfully!');
-        // Refetch rooms after updating
-        return axios.get(`/branches/${branchId}/rooms`);
-      })
-      .then((response) => {
-        setRooms(response.data);
+        fetchRooms();
         setEditingRoom(null); // Reset edit form
       })
       .catch((error) => {
@@ -92,19 +79,12 @@ const RoomList = ({ branchId }) => {
       });
   };
 
-  // Delete room
   const handleDeleteRoom = (roomId) => {
-    console.log('Deleting room with ID:', roomId);  // Debugging
     axios
-      .delete(`/rooms/${roomId}`)
-      .then((response) => {
-        console.log('Room deleted:', response.data);
+      .delete(`http://localhost:5000/rooms/${roomId}`)
+      .then(() => {
         alert('Room deleted successfully!');
-        // Refetch rooms after deleting
-        return axios.get(`/branches/${branchId}/rooms`);
-      })
-      .then((response) => {
-        setRooms(response.data);
+        fetchRooms();
       })
       .catch((error) => {
         console.error('Error deleting room:', error);
@@ -115,7 +95,6 @@ const RoomList = ({ branchId }) => {
     <div style={styles.container}>
       <h1 style={styles.header}>Room Management</h1>
 
-      {/* Add new room form */}
       <div style={styles.formContainer}>
         <h2>Add New Room</h2>
         <input
@@ -126,19 +105,22 @@ const RoomList = ({ branchId }) => {
           onChange={handleInputChange}
           style={styles.input}
         />
-        <input
-          type="text"
+        <select
           name="room_type"
-          placeholder="Room Type"
           value={newRoom.room_type}
           onChange={handleInputChange}
-          style={styles.input}
-        />
+          style={styles.select}
+        >
+          <option value="single">Single</option>
+          <option value="double">Double</option>
+          <option value="fullhouse">Fullhouse</option>
+          <option value="studio">Studio</option>
+        </select>
         <input
           type="number"
-          name="rent_amount"
-          placeholder="Rent Amount"
-          value={newRoom.rent_amount}
+          name="price"
+          placeholder="Price"
+          value={newRoom.price}
           onChange={handleInputChange}
           style={styles.input}
         />
@@ -148,13 +130,20 @@ const RoomList = ({ branchId }) => {
           onChange={handleInputChange}
           style={styles.select}
         >
-          <option value="available">Available</option>
+          <option value="empty">Empty</option>
           <option value="occupied">Occupied</option>
         </select>
+        <input
+          type="text"
+          name="tenant_id"
+          placeholder="Tenant ID (if occupied)"
+          value={newRoom.tenant_id}
+          onChange={handleInputChange}
+          style={styles.input}
+        />
         <button onClick={handleCreateRoom} style={styles.button}>Add Room</button>
       </div>
 
-      {/* Edit room form */}
       {editingRoom && (
         <div style={styles.formContainer}>
           <h2>Edit Room</h2>
@@ -166,19 +155,22 @@ const RoomList = ({ branchId }) => {
             onChange={handleEditChange}
             style={styles.input}
           />
-          <input
-            type="text"
+          <select
             name="room_type"
-            placeholder="Room Type"
             value={editingRoom.room_type}
             onChange={handleEditChange}
-            style={styles.input}
-          />
+            style={styles.select}
+          >
+            <option value="single">Single</option>
+            <option value="double">Double</option>
+            <option value="fullhouse">Fullhouse</option>
+            <option value="studio">Studio</option>
+          </select>
           <input
             type="number"
-            name="rent_amount"
-            placeholder="Rent Amount"
-            value={editingRoom.rent_amount}
+            name="price"
+            placeholder="Price"
+            value={editingRoom.price}
             onChange={handleEditChange}
             style={styles.input}
           />
@@ -188,14 +180,21 @@ const RoomList = ({ branchId }) => {
             onChange={handleEditChange}
             style={styles.select}
           >
-            <option value="available">Available</option>
+            <option value="empty">Empty</option>
             <option value="occupied">Occupied</option>
           </select>
+          <input
+            type="text"
+            name="tenant_id"
+            placeholder="Tenant ID (if occupied)"
+            value={editingRoom.tenant_id}
+            onChange={handleEditChange}
+            style={styles.input}
+          />
           <button onClick={handleUpdateRoom} style={styles.button}>Update Room</button>
         </div>
       )}
 
-      {/* Room list */}
       <div style={styles.roomList}>
         <h2>Rooms</h2>
         <table style={styles.table}>
@@ -203,8 +202,9 @@ const RoomList = ({ branchId }) => {
             <tr>
               <th style={styles.tableHeader}>Room Number</th>
               <th style={styles.tableHeader}>Room Type</th>
-              <th style={styles.tableHeader}>Rent Amount</th>
+              <th style={styles.tableHeader}>Price</th>
               <th style={styles.tableHeader}>Status</th>
+              <th style={styles.tableHeader}>Tenant ID</th>
               <th style={styles.tableHeader}>Actions</th>
             </tr>
           </thead>
@@ -213,8 +213,9 @@ const RoomList = ({ branchId }) => {
               <tr key={room.room_id} style={styles.tableRow}>
                 <td>{room.room_number}</td>
                 <td>{room.room_type}</td>
-                <td>{room.rent_amount}</td>
+                <td>{room.price}</td>
                 <td>{room.status}</td>
+                <td>{room.tenant_id}</td>
                 <td>
                   <button
                     onClick={() => setEditingRoom(room)}
@@ -238,7 +239,6 @@ const RoomList = ({ branchId }) => {
   );
 };
 
-// Inline CSS styles (same as previous code)
 const styles = {
   container: {
     padding: '20px',

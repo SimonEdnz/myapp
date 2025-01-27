@@ -88,3 +88,21 @@ In this project we created a Apartment management system with user interface and
 
 - Now, you can use the project.
 
+  ],
+    employee: [
+      { name: "Dashboard", path: "/employee", icon: "📊" },
+      { name: "Complaints", path: "/employee/complaints", icon: "📋" },
+      { name: "Logout", path: "/", icon: "🚪" },
+    ],
+    tenant: [
+      { name: "Dashboard", path: "/tenant", icon: "📊" },
+      { name: "Complaints", path: "/tenant/complaints", icon: "📋" },
+      { name: "Logout", path: "/", icon: "🚪" },
+    ],
+    owner: [
+      { name: "Dashboard", path: "/owner", icon: "📊" },
+      { name: "Tenant Details", path: "/owner/tenantdetails", icon: "👤" },
+      { name: "Complaints", path: "/owner/complaints", icon: "📋" },
+      { name: "Room Details", path: "/owner/roomdetails", icon: "🛏️" },
+      { name: "Logout", path: "/", icon: "🚪" },
+    ],

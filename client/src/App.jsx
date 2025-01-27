@@ -5,31 +5,25 @@ import Sidebar from "./components/Sidebar";
 import Dashboard from "./components/Dashboard";
 import Auth from "./components/Auth";
 import TenantDetails from "./components/TenantDetails";
-import ComplaintsViewer from "./components/ComplaintsViewer";
-import BranchList from "./components/BranchList";
-import CreateBranch from "./components/CreateBranch";
+import BranchList from "./components/BranchManagement";
 import UpdateDeleteBranch from "./components/UpdateDeleteBranch";
 import RoomList from "./components/RoomList";
-import InvoiceList from "./components/InvoiceList";
-import LeaseAgreementList from "./components/LeaseAgreementList";
-import Notifications from "./components/Notifications";
+import BranchManagement from './components/BranchManagement';
+import BranchDetails from './components/BranchDetails';
 import Settings from "./components/Settings";
-import Expenses from "./components/Expenses";
-import RoomDetailsOwner from "./components/RoomDetailsOwner"; // Import RoomDetailsOwner component
+import Complaints from "./components/ComplaintsManagement";
+import TenantManagement from "./components/TenantManagement";
 import ErrorPage from "./ErrorPage";
+import ComplaintsManagement from "./components/ComplaintsManagement";
 
 // Sidebar configuration for admin routes
 const adminRoutes = [
   { name: "Dashboard", path: "/admin", icon: "📊" },
   { name: "Tenant Details", path: "/admin/tenantdetails", icon: "👤" },
-  { name: "Complaints", path: "/admin/complaints", icon: "📋" },
   { name: "Branches", path: "/admin/branches", icon: "🌿" },
+  {name: "Complaints", path: "/admin/complaints", icon: "📋"},
   { name: "Rooms", path: "/admin/rooms", icon: "🛏️" },
-  { name: "Invoices", path: "/admin/invoices", icon: "💵" },
-  { name: "Lease Agreements", path: "/admin/leaseagreements", icon: "📜" },
-  { name: "Notifications", path: "/admin/notifications", icon: "🔔" },
   { name: "Settings", path: "/settings", icon: "⚙️" },
-  { name: "Expenses", path: "/expenses", icon: "💸" },
   { name: "Logout", path: "/", icon: "🚪" },
 ];
 
@@ -43,7 +37,7 @@ const employeeRoutes = [
 // Sidebar configuration for tenant routes
 const tenantRoutes = [
   { name: "Dashboard", path: "/tenant", icon: "📊" },
-  { name: "Complaints", path: "/tenant/complaints", icon: "📋" },
+  {name: "Complaints", path: "/tenant/complaints", icon: "📋"},
   { name: "Logout", path: "/", icon: "🚪" },
 ];
 
@@ -85,16 +79,13 @@ function App() {
               <Routes>
                 <Route path="/" element={<Dashboard />} />
                 <Route path="tenantdetails" element={<TenantDetails />} />
-                <Route path="complaints" element={<ComplaintsViewer />} />
-                <Route path="branches" element={<BranchList />} />
-                <Route path="createbranch" element={<CreateBranch />} />
+                <Route path="branches" element={<BranchManagement />} />
+                <Route path="branches/:branchId/details" element={<BranchDetails />} />
+                <Route path="branches/:branchId/details/tenants" element={<TenantManagement />} />
                 <Route path="updatebranch" element={<UpdateDeleteBranch />} />
                 <Route path="rooms" element={<RoomList />} />
-                <Route path="invoices" element={<InvoiceList />} />
-                <Route path="leaseagreements" element={<LeaseAgreementList />} />
-                <Route path="notifications" element={<Notifications />} />
+                <Route path="complaints" element={<ComplaintsManagement />} />
                 <Route path="settings" element={<Settings />} />
-                <Route path="expenses" element={<Expenses />} />
               </Routes>
             </MainLayout>
           }
@@ -107,7 +98,6 @@ function App() {
             <MainLayout sidebarLinks={employeeRoutes}>
               <Routes>
                 <Route path="/" element={<Dashboard />} />
-                <Route path="complaints" element={<ComplaintsViewer />} />
               </Routes>
             </MainLayout>
           }
@@ -120,7 +110,6 @@ function App() {
             <MainLayout sidebarLinks={tenantRoutes}>
               <Routes>
                 <Route path="/" element={<Dashboard />} />
-                <Route path="complaints" element={<ComplaintsViewer />} />
               </Routes>
             </MainLayout>
           }
@@ -133,8 +122,6 @@ function App() {
             <MainLayout sidebarLinks={ownerRoutes}>
               <Routes>
                 <Route path="/" element={<Dashboard />} />
-                <Route path="tenantdetails" element={<RoomDetailsOwner />} />
-                <Route path="roomdetails" element={<RoomDetailsOwner />} />
               </Routes>
             </MainLayout>
           }
